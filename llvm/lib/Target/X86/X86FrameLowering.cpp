@@ -1398,7 +1398,8 @@ void X86FrameLowering::emitPrologue(MachineFunction &MF,
     MFI.setStackSize(StackSize);
     emitSPUpdate(MBB, MBBI, DL, -8, /*InEpilogue=*/false);
   }
-
+  
+    
   // If this is x86-64 and the Red Zone is not disabled, if we are a leaf
   // function, and use up to 128 bytes of stack space, don't have a frame
   // pointer, calls, or dynamic alloca then we do not need to adjust the
@@ -1873,6 +1874,13 @@ void X86FrameLowering::emitPrologue(MachineFunction &MF,
 
   // At this point we know if the function has WinCFI or not.
   MF.setHasWinCFI(HasWinCFI);
+  
+  //Added for SORA prologue
+  //BuildMI(MBB, MBBI, DL, TII.get(X86::NOOP));
+  if (MF.getName()!="siphash24"){
+      //BuildMI(MBB,MBBI,DL, TII.get(STI.is64Bit() ? X86::SUB64ri8 : X86::SUB32ri8), STI.is64Bit() ? X86::RSP : X86::ESP).addReg(STI.is64Bit() ? X86::RSP : X86::ESP).addImm(STI.is64Bit() ? 16: 8);
+      BuildMI(MBB, MBBI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("siphash24");
+  }
 }
 
 bool X86FrameLowering::canUseLEAForSPInEpilogue(
@@ -2005,7 +2013,17 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
     NumBytes = StackSize - CSSize;
   }
   uint64_t SEHStackAllocAmt = NumBytes;
-
+  
+  //Added for SORA epilogue without callee-saved registers
+  if (MFI.getCalleeSavedInfo().empty()){
+      //BuildMI(MBB, MBBI, DL, TII.get(X86::NOOP));
+      if (MF.getName()!="siphash24"){
+          BuildMI(MBB, MBBI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("siphash24");
+          //BuildMI(MBB,MBBI,DL, TII.get(STI.is64Bit() ? X86::ADD64ri8 : X86::ADD32ri8), STI.is64Bit() ? X86::RSP : X86::ESP).addReg(STI.is64Bit() ? X86::RSP : X86::ESP).addImm(STI.is64Bit() ? 16: 8);
+      
+      }
+  }
+    
   // AfterPop is the position to insert .cfi_restore.
   MachineBasicBlock::iterator AfterPop = MBBI;
   if (HasFP) {
@@ -2571,7 +2589,15 @@ bool X86FrameLowering::restoreCalleeSavedRegisters(
   }
 
   DebugLoc DL = MBB.findDebugLoc(MI);
-
+  
+  //Added for SORA epilogue
+  MachineFunction *MF=MBB.getParent();
+  //BuildMI(MBB, MBBI, DL, TII.get(X86::NOOP));
+  if (MF->getName()!="siphash24"){
+        BuildMI(MBB, MI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("siphash24");
+        //BuildMI(MBB,MI,DL, TII.get(STI.is64Bit() ? X86::ADD64ri8 : X86::ADD32ri8), STI.is64Bit() ? X86::RSP : X86::ESP).addReg(STI.is64Bit() ? X86::RSP : X86::ESP).addImm(STI.is64Bit() ? 16: 8);
+                 
+  }
   // Reload XMMs from stack frame.
   for (unsigned i = 0, e = CSI.size(); i != e; ++i) {
     unsigned Reg = CSI[i].getReg();
