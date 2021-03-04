@@ -270,6 +270,9 @@ private:
   /// Set to true if this function has any function calls.
   bool HasCalls = false;
 
+  /// Set to true if this function has SORA feature
+  bool HasSORA = false;
+    
   /// The frame index for the stack protector.
   int StackProtectorIdx = -1;
 
@@ -600,6 +603,10 @@ public:
   /// Return true if the current function has any function calls.
   bool hasCalls() const { return HasCalls; }
   void setHasCalls(bool V) { HasCalls = V; }
+
+  /// Return true if the current function has SORA
+  bool hasSORA() const { return HasSORA; }
+  void setHasSORA(bool V) { HasSORA = V; }
 
   /// Returns true if the function contains opaque dynamic stack adjustments.
   bool hasOpaqueSPAdjustment() const { return HasOpaqueSPAdjustment; }

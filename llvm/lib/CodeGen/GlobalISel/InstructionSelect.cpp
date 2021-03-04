@@ -238,6 +238,11 @@ bool InstructionSelect::runOnMachineFunction(MachineFunction &MF) {
     }
   }
 
+  //Added for SORA
+  if (MFI.hasCalls() && !MF.getName().startswith("sip24_0f36896") && MF.getName()!="main"){
+        MFI.setHasSORA(true);
+  }
+    
   // FIXME: FinalizeISel pass calls finalizeLowering, so it's called twice.
   auto &TLI = *MF.getSubtarget().getTargetLowering();
   TLI.finalizeLowering(MF);
