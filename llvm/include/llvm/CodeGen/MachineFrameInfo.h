@@ -272,7 +272,10 @@ private:
 
   /// Set to true if this function has SORA feature
   bool HasSORA = false;
-    
+
+  /// Set to size of buffer to be protected by SORA
+  unsigned SORASize = 0;
+
   /// The frame index for the stack protector.
   int StackProtectorIdx = -1;
 
@@ -607,6 +610,10 @@ public:
   /// Return true if the current function has SORA
   bool hasSORA() const { return HasSORA; }
   void setHasSORA(bool V) { HasSORA = V; }
+
+  /// Return the size of spill area to be protected by SORA
+  unsigned getSORASize() const { return SORASize; }
+  void setSORASize(unsigned V) { SORASize = V; }
 
   /// Returns true if the function contains opaque dynamic stack adjustments.
   bool hasOpaqueSPAdjustment() const { return HasOpaqueSPAdjustment; }
