@@ -87,9 +87,9 @@ namespace {
 struct SORACCModifier : public FunctionPass {
     static char ID; // Pass identification, replacement for typeid
     SORACCModifier() : FunctionPass(ID) {}
-    
+
     bool runOnFunction(Function &F) override {
-        
+
 //        Instruction &Entry=F.getEntryBlock().front();
 //        Function* Sip=F.getParent()->getFunction("siphash24");
 //        Value* Address;
@@ -116,7 +116,7 @@ struct SORACCModifier : public FunctionPass {
         outs() << F.getName() << "\n";
         return false;
     }
-    
+
     // We don't modify the program, so we preserve all analyses.
     void getAnalysisUsage(AnalysisUsage &AU) const override {
         AU.setPreservesAll();
@@ -132,3 +132,9 @@ Y("sora-modifier", "Pass that replaces calling convention attribute of functions
 //    llvm::PassManagerBuilder::EP_EarlyAsPossible,
 //    [](const llvm::PassManagerBuilder &Builder,
 //       llvm::legacy::PassManagerBase &PM) { PM.add(new SORACCModifier()); });
+
+//static llvm::RegisterStandardPasses A(
+//    llvm::PassManagerBuilder::EP_EarlyAsPossible,
+//    [](const llvm::PassManagerBuilder &Builder,
+//       llvm::legacy::PassManagerBase &PM) { PM.add(new SORACCModifier()); });
+

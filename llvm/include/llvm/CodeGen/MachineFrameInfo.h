@@ -273,6 +273,9 @@ private:
   /// Set to true if this function has SORA feature
   bool HasSORA = false;
 
+  /// Set to true if this function is main function of SORA
+  bool IsSORAMain = false;
+
   /// Set to size of buffer to be protected by SORA
   unsigned SORASize = 0;
 
@@ -610,6 +613,10 @@ public:
   /// Return true if the current function has SORA
   bool hasSORA() const { return HasSORA; }
   void setHasSORA(bool V) { HasSORA = V; }
+
+  /// Return true if the current function is main for SORA
+  bool isSORAMain() const { return IsSORAMain; }
+  void setIsSORAMain(bool V) { IsSORAMain = V; }
 
   /// Return the size of spill area to be protected by SORA
   unsigned getSORASize() const { return SORASize; }

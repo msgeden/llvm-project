@@ -654,10 +654,21 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
       }
     }
   }
-    
+
+
   //Added for SORA
-  if (MFI.hasCalls() && !MF->getName().startswith("sip24_0f36896") && MF->getName()!="main"){
+  bool hasReturn=false;
+  for (const auto &MBB : *MF) {
+    for (const auto &MI : MBB) {
+      if (MI.isReturn())
+        hasReturn=true;
+    }
+  }
+  if (MFI.hasCalls() && !MF->getName().startswith("sip24_0f36896") && hasReturn){
         MFI.setHasSORA(true);
+  }
+  if (MF->getName()=="main"){
+        MFI.setIsSORAMain(true);
   }
 
   // Determine if there is a call to setjmp in the machine function.
