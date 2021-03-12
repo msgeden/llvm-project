@@ -1610,55 +1610,13 @@ void X86FrameLowering::emitPrologue(MachineFunction &MF,
 
     //Added for SORA prologue
     if (MF.getFrameInfo().isSORAMain() && Is64Bit){
-//        BuildMI(MBB,MBBI,DL,TII.get(X86::PXORrr),X86::XMM15).addReg(X86::XMM15).addReg(X86::XMM15);
-//        BuildMI(MBB,MBBI,DL,TII.get(X86::RDRAND64r)).addReg(X86::R11);
-//        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64toPQIrr)).addReg(X86::XMM15).addReg(X86::R11);
-//        BuildMI(MBB,MBBI,DL,TII.get(X86::PSLLDQri),X86::XMM15).addReg(X86::XMM3).addImm(8);
-//        BuildMI(MBB,MBBI,DL,TII.get(X86::RDRAND64r)).addReg(X86::R11);
-//        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64toPQIrr)).addReg(X86::XMM15).addReg(X86::R11);
-
         BuildMI(MBB,MBBI,DL,TII.get(X86::PXORrr),X86::XMM14).addReg(X86::XMM14).addReg(X86::XMM14);
         BuildMI(MBB,MBBI,DL,TII.get(X86::PXORrr),X86::XMM15).addReg(X86::XMM15).addReg(X86::XMM15);
         BuildMI(MBB,MBBI,DL,TII.get(X86::RDRAND64r)).addReg(X86::R11);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64toPQIrr)).addReg(X86::XMM14).addReg(X86::R11);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::RDRAND64r)).addReg(X86::R11);
         BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64toPQIrr)).addReg(X86::XMM15).addReg(X86::R11);
-    }
-    //BuildMI(MBB, MBBI, DL, TII.get(X86::NOOP));
-    if (MF.getFrameInfo().hasSORA() && Is64Bit){
-        BuildMI(MBB,MBBI,DL, TII.get(X86::SUB64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
-
-        //Save volatile registers not to have an impact on the arguments of the function being protected
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDI);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RSI);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RCX);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDX);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
-        //Prepare arguments for SipHash Generations (address and size of spilled area)
-        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDI).addReg(X86::RBP);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1);
-        //Set the starting address for spill area, -1 is for return address as rbp should be already pointing address after push rbp
-        BuildMI(MBB,MBBI,DL,TII.get(X86::SUB64ri8),X86::RDI).addReg(X86::RDI).addImm(SlotSize*(MFI.getSORASize()*0));
-        //Set the size of spill area
-        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1*(MFI.getSORASize()));
-        //Generate tag for spilled values through SipHash-2-4
-        BuildMI(MBB, MBBI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("sip24_0f36896");
-        //Keep 64-bit tag on reserved RBX register
-        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::RBX).addReg(X86::RAX);
-        //Restore volatile registers
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RDX);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RCX);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RSI);
-        BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RDI);
-
-        BuildMI(MBB,MBBI,DL, TII.get(X86::ADD64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
+        BuildMI(MBB,MBBI,DL,TII.get(X86::RDRAND64r)).addReg(X86::R11);
+        BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64toPQIrr)).addReg(X86::XMM14).addReg(X86::R11);
+        //BuildMI(MBB,MBBI,DL,TII.get(X86::PUNPCKLQDQrr),X86::XMM15).addReg(X86::XMM15).addReg(X86::XMM14);
     }
 
     uint64_t AlignedNumBytes = NumBytes;
@@ -2069,40 +2027,40 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
         //BuildMI(MBB, MBBI, DL, TII.get(X86::NOOP));
         if (MFI.hasSORA() && Is64Bit){
             //Prepare arguments for SipHash Generations (address and size of spilled area)
-            BuildMI(MBB,MBBI,DL, TII.get(X86::SUB64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
-
+            //BuildMI(MBB,MBBI,DL, TII.get(X86::SUB64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
             //Save volatile registers not to have an impact on the arguments of the function being protected
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDI);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RSI);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RCX);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDX);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RAX);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDI);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RSI);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RCX);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDX);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
 
             BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDI).addReg(X86::RBP);
             BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1);
             //Set the starting address for spill area, -1 is for return address as rbp should be already pointing address after push rbp
-            BuildMI(MBB,MBBI,DL,TII.get(X86::SUB64ri8),X86::RDI).addReg(X86::RDI).addImm(SlotSize*(MFI.getSORASize()*0));
+            //BuildMI(MBB,MBBI,DL,TII.get(X86::SUB64ri8),X86::RDI).addReg(X86::RDI).addImm(SlotSize*(MFI.getSORASize()*0));
             //Set the size of spill area
-            BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1*(MFI.getSORASize()));
-            BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDX).addReg(X86::RBX);
+            //BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1*(MFI.getSORASize()));
             //Generate tag for the values to restored check their integrity with prologue value (RBX) within this SipHash-2-4 function
+            BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDX).addReg(X86::RBX);
             BuildMI(MBB, MBBI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("sip24_0f36896_check");
-
+            //BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::R11).addReg(X86::RAX);
 
             //Restore volatile registers
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RDX);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RCX);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RSI);
-//            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RDI);
-
-            BuildMI(MBB,MBBI,DL, TII.get(X86::ADD64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
+            //BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RDX);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RCX);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RSI);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RDI);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::RAX);
+            //BuildMI(MBB,MBBI,DL, TII.get(X86::ADD64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
             //BuildMI(MBB,MBBI,DL, TII.get(STI.is64Bit() ? X86::ADD64ri8 : X86::ADD32ri8), STI.is64Bit() ? X86::RSP : X86::ESP).addReg(STI.is64Bit() ? X86::RSP : X86::ESP).addImm(STI.is64Bit() ? 16: 8);
         }
     }
@@ -2243,6 +2201,26 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
             emitSPUpdate(MBB, Terminator, DL, Offset, /*InEpilogue=*/true);
         }
     }
+//     if (MF.getFrameInfo().hasSORA() && Is64Bit){
+//        const BasicBlock *LLVM_BB = MBB.getBasicBlock();
+//        MachineBasicBlock *successMBB = MF.CreateMachineBasicBlock(LLVM_BB);
+//        MachineBasicBlock *failMBB = MF.CreateMachineBasicBlock(LLVM_BB);
+//        MachineFunction::iterator MBBIter = ++MBB.getIterator();
+//        MF.insert(MBBIter, successMBB);
+//        MF.insert(MBBIter, failMBB);
+//        BuildMI(MBB, MBBI, DL,TII.get(X86::CMP64rr)).addReg(X86::RBX).addReg(X86::R11).setMIFlag(MachineInstr::FrameDestroy);
+//        BuildMI(MBB, MBBI, DL, TII.get(X86::JCC_1)).addMBB(failMBB).addImm(X86::COND_NE).setMIFlag(MachineInstr::FrameDestroy);
+//        MBB.addSuccessor(failMBB);
+//        // BB management
+//        successMBB->splice(successMBB->end(), &MBB, MBBI, MBB.end());
+//        successMBB->transferSuccessorsAndUpdatePHIs(&MBB);
+//        MBB.addSuccessor(successMBB);
+//        MachineBasicBlock::iterator MBBIFail=failMBB->begin();
+//        BuildMI(*failMBB, MBBIFail, DL,TII.get(X86::MOV64ri)).addReg(X86::RDI).addImm(113).setMIFlag(MachineInstr::FrameDestroy);
+//        BuildMI(*failMBB, MBBIFail, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("exit").setMIFlag(MachineInstr::FrameDestroy);
+//        recomputeLiveIns(*successMBB);
+//        recomputeLiveIns(*failMBB);
+//    }
 }
 
 int X86FrameLowering::getFrameIndexReference(const MachineFunction &MF, int FI,
@@ -2625,7 +2603,45 @@ bool X86FrameLowering::spillCalleeSavedRegisters(
         MI->setFlag(MachineInstr::FrameSetup);
         ++MI;
     }
+ if (MF.getFrameInfo().hasSORA() && Is64Bit){
+        //BuildMI(MBB,MI,DL, TII.get(X86::SUB64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
 
+        //Save volatile registers not to have an impact on the arguments of the function being protected
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RAX);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDI);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RSI);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RCX);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDX);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
+        //BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
+
+        //Prepare arguments for SipHash Generations (address and size of spilled area)
+        BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDI).addReg(X86::RBP);
+        BuildMI(MBB,MI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1);
+        //Set the starting address for spill area, -1 is for return address as rbp should be already pointing address after push rbp
+        //BuildMI(MBB,MBBI,DL,TII.get(X86::SUB64ri8),X86::RDI).addReg(X86::RDI).addImm(SlotSize*(MFI.getSORASize()*0));
+        //Set the size of spill area
+        //BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1*(MFI.getSORASize()));
+        //Generate tag for spilled values through SipHash-2-4
+        BuildMI(MBB, MI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("sip24_0f36896");
+        //Keep 64-bit tag on reserved RBX register
+        BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RBX).addReg(X86::RAX);
+
+        //Restore volatile registers
+        //BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RDX);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RCX);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RSI);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RDI);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RAX);
+
+        //BuildMI(MBB,MI,DL, TII.get(X86::ADD64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
+    }
     return true;
 }
 
@@ -2689,40 +2705,41 @@ bool X86FrameLowering::restoreCalleeSavedRegisters(
     //BuildMI(MBB, MBBI, DL, TII.get(X86::NOOP));
     if (MF->getFrameInfo().hasSORA() && Is64Bit){
         //Prepare arguments for SipHash Generations (address and size of spilled area)
-        BuildMI(MBB, MI,DL, TII.get(X86::SUB64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
+        //BuildMI(MBB, MI,DL, TII.get(X86::SUB64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
 
         //Save volatile registers not to have an impact on the arguments of the function being protected
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDI);
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RSI);
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RCX);
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDX);
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
-//        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RAX);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDI);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RSI);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RCX);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDX);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
+        //BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
 
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDI).addReg(X86::RBP);
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1);
         //Set the starting address for spill area, -1 is for return address as rbp should be already pointing address after push rbp
-        BuildMI(MBB,MI,DL,TII.get(X86::SUB64ri8),X86::RDI).addReg(X86::RDI).addImm(SlotSize*(MFI.getSORASize()*0));
+        //BuildMI(MBB,MI,DL,TII.get(X86::SUB64ri8),X86::RDI).addReg(X86::RDI).addImm(SlotSize*(MFI.getSORASize()*0));
         //Set the size of spill area
-        BuildMI(MBB,MI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1*(MFI.getSORASize()));
-        BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDX).addReg(X86::RBX);
+        //BuildMI(MBB,MI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1*(MFI.getSORASize()));
         //Generate tag for the values to restored check their integrity with prologue value (RBX) within this SipHash-2-4 function
+        BuildMI(MBB, MI, DL, TII.get(X86::MOV64rr)).addReg(X86::RDX).addReg(X86::RBX);
         BuildMI(MBB, MI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("sip24_0f36896_check");
-
+        //BuildMI(MBB, MI,DL,TII.get(X86::MOV64rr)).addReg(X86::R11).addReg(X86::RAX);
 
         //Restore volatile registers
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RDX);
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RCX);
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RSI);
-//        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RDI);
-
-        BuildMI(MBB, MI,DL, TII.get(X86::ADD64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
+        //BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RDX);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RCX);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RSI);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RDI);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::RAX);
+        //BuildMI(MBB, MI,DL, TII.get(X86::ADD64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
         //BuildMI(MBB,MBBI,DL, TII.get(STI.is64Bit() ? X86::ADD64ri8 : X86::ADD32ri8), STI.is64Bit() ? X86::RSP : X86::ESP).addReg(STI.is64Bit() ? X86::RSP : X86::ESP).addImm(STI.is64Bit() ? 16: 8);
     }
     // Reload XMMs from stack frame.
