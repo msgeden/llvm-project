@@ -2051,7 +2051,11 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
             //BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::R11).addReg(X86::RAX);
 
             //Restore volatile registers
-            //BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R15);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R14);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R13);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R12);
+            BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
             BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
             BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
             BuildMI(MBB,MBBI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
@@ -2605,7 +2609,6 @@ bool X86FrameLowering::spillCalleeSavedRegisters(
     }
  if (MF.getFrameInfo().hasSORA() && Is64Bit){
         //BuildMI(MBB,MI,DL, TII.get(X86::SUB64ri8), X86::RSP).addReg(X86::RSP).addImm(16);
-
         //Save volatile registers not to have an impact on the arguments of the function being protected
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RAX);
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::RDI);
@@ -2615,7 +2618,11 @@ bool X86FrameLowering::spillCalleeSavedRegisters(
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
-        //BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R12);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R13);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R14);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R15);
 
         //Prepare arguments for SipHash Generations (address and size of spilled area)
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDI).addReg(X86::RBP);
@@ -2630,7 +2637,11 @@ bool X86FrameLowering::spillCalleeSavedRegisters(
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RBX).addReg(X86::RAX);
 
         //Restore volatile registers
-        //BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R15);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R14);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R13);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R12);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
         BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
         BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
         BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R8);
@@ -2716,7 +2727,11 @@ bool X86FrameLowering::restoreCalleeSavedRegisters(
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R8);
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R9);
         BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R10);
-        //BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R12);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R13);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R14);
+        BuildMI(MBB,MI,DL,TII.get(X86::PUSH64r)).addReg(X86::R15);
 
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDI).addReg(X86::RBP);
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(1);
@@ -2730,7 +2745,11 @@ bool X86FrameLowering::restoreCalleeSavedRegisters(
         //BuildMI(MBB, MI,DL,TII.get(X86::MOV64rr)).addReg(X86::R11).addReg(X86::RAX);
 
         //Restore volatile registers
-        //BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R15);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R14);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R13);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R12);
+        BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R11);
         BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R10);
         BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R9);
         BuildMI(MBB,MI,DL,TII.get(X86::POP64r)).addReg(X86::R8);

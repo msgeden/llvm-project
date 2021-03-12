@@ -547,7 +547,8 @@ BitVector X86RegisterInfo::getReservedRegs(const MachineFunction &MF) const {
             Reserved.set(*AI);
         }
         //Reserve RBX for MAC tags
-        Reserved.set(X86::RBX);
+        for (const MCPhysReg &SubReg : subregs_inclusive(X86::RBX))
+            Reserved.set(SubReg);
     }
     // Set the base-pointer register and its aliases as reserved if needed.
     if (hasBasePointer(MF)) {
