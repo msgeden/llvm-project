@@ -316,6 +316,11 @@ AArch64RegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   if (MF.getFunction().hasFnAttribute(Attribute::SpeculativeLoadHardening))
     markSuperRegs(Reserved, AArch64::W16);
 
+  //Added for SORA
+  if (MF.getFrameInfo().hasSORA()){
+	markSuperRegs(Reserved, AArch64::W20);
+  }
+
   assert(checkAllSuperRegsMarked(Reserved));
   return Reserved;
 }
