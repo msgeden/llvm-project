@@ -664,7 +664,7 @@ bool SelectionDAGISel::runOnMachineFunction(MachineFunction &mf) {
         hasReturn=true;
     }
   }
-  if (MFI.hasCalls() && !MF->getName().startswith("sip24_0f36896") && hasReturn){
+  if (MFI.hasCalls() && !MF->getName().startswith("sip24_") && hasReturn){
         MFI.setHasSORA(true);
   }
   if (MF->getName()=="main"){

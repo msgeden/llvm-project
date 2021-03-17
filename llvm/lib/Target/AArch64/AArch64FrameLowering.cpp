@@ -426,7 +426,7 @@ static void appendVGScaledOffsetExpr(SmallVectorImpl<char> &Expr,
 		Expr.push_back((uint8_t)dwarf::DW_OP_plus);
 
 		Comment << (NumVGScaledBytes < 0 ? " - " : " + ")
-            		<< std::abs(NumVGScaledBytes) << " * VG";
+            								<< std::abs(NumVGScaledBytes) << " * VG";
 	}
 }
 
@@ -697,10 +697,10 @@ static MachineBasicBlock::iterator InsertSEH(MachineBasicBlock::iterator MBBI,
 		unsigned Reg0 = RegInfo->getSEHRegNum(MBBI->getOperand(1).getReg());
 		unsigned Reg1 = RegInfo->getSEHRegNum(MBBI->getOperand(2).getReg());
 		MIB = BuildMI(MF, DL, TII.get(AArch64::SEH_SaveFRegP_X))
-            		  .addImm(Reg0)
-					  .addImm(Reg1)
-					  .addImm(Imm * 8)
-					  .setMIFlag(Flag);
+            								  .addImm(Reg0)
+											  .addImm(Reg1)
+											  .addImm(Imm * 8)
+											  .setMIFlag(Flag);
 		break;
 	}
 	case AArch64::LDPXpost:
@@ -727,9 +727,9 @@ static MachineBasicBlock::iterator InsertSEH(MachineBasicBlock::iterator MBBI,
 	case AArch64::STRDpre: {
 		unsigned Reg = RegInfo->getSEHRegNum(MBBI->getOperand(1).getReg());
 		MIB = BuildMI(MF, DL, TII.get(AArch64::SEH_SaveFReg_X))
-            		  .addImm(Reg)
-					  .addImm(Imm)
-					  .setMIFlag(Flag);
+            								  .addImm(Reg)
+											  .addImm(Imm)
+											  .setMIFlag(Flag);
 		break;
 	}
 	case AArch64::LDRXpost:
@@ -738,9 +738,9 @@ static MachineBasicBlock::iterator InsertSEH(MachineBasicBlock::iterator MBBI,
 	case AArch64::STRXpre: {
 		unsigned Reg =  RegInfo->getSEHRegNum(MBBI->getOperand(1).getReg());
 		MIB = BuildMI(MF, DL, TII.get(AArch64::SEH_SaveReg_X))
-            		  .addImm(Reg)
-					  .addImm(Imm)
-					  .setMIFlag(Flag);
+            								  .addImm(Reg)
+											  .addImm(Imm)
+											  .setMIFlag(Flag);
 		break;
 	}
 	case AArch64::STPDi:
@@ -748,10 +748,10 @@ static MachineBasicBlock::iterator InsertSEH(MachineBasicBlock::iterator MBBI,
 		unsigned Reg0 =  RegInfo->getSEHRegNum(MBBI->getOperand(0).getReg());
 		unsigned Reg1 =  RegInfo->getSEHRegNum(MBBI->getOperand(1).getReg());
 		MIB = BuildMI(MF, DL, TII.get(AArch64::SEH_SaveFRegP))
-            		  .addImm(Reg0)
-					  .addImm(Reg1)
-					  .addImm(Imm * 8)
-					  .setMIFlag(Flag);
+            								  .addImm(Reg0)
+											  .addImm(Reg1)
+											  .addImm(Imm * 8)
+											  .setMIFlag(Flag);
 		break;
 	}
 	case AArch64::STPXi:
@@ -774,18 +774,18 @@ static MachineBasicBlock::iterator InsertSEH(MachineBasicBlock::iterator MBBI,
 	case AArch64::LDRXui: {
 		int Reg = RegInfo->getSEHRegNum(MBBI->getOperand(0).getReg());
 		MIB = BuildMI(MF, DL, TII.get(AArch64::SEH_SaveReg))
-            		  .addImm(Reg)
-					  .addImm(Imm * 8)
-					  .setMIFlag(Flag);
+            								  .addImm(Reg)
+											  .addImm(Imm * 8)
+											  .setMIFlag(Flag);
 		break;
 	}
 	case AArch64::STRDui:
 	case AArch64::LDRDui: {
 		unsigned Reg = RegInfo->getSEHRegNum(MBBI->getOperand(0).getReg());
 		MIB = BuildMI(MF, DL, TII.get(AArch64::SEH_SaveFReg))
-            		  .addImm(Reg)
-					  .addImm(Imm * 8)
-					  .setMIFlag(Flag);
+            								  .addImm(Reg)
+											  .addImm(Imm * 8)
+											  .setMIFlag(Flag);
 		break;
 	}
 	}
@@ -1080,7 +1080,7 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 			.setMIFlag(MachineInstr::FrameSetup);
 		else {
 			BuildMI(MBB, MBBI, DL, TII->get(AArch64::EMITBKEY))
-        		  .setMIFlag(MachineInstr::FrameSetup);
+        								  .setMIFlag(MachineInstr::FrameSetup);
 			BuildMI(MBB, MBBI, DL, TII->get(AArch64::PACIBSP))
 			.setMIFlag(MachineInstr::FrameSetup);
 		}
@@ -1220,17 +1220,17 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 			.setMIFlag(MachineInstr::FrameSetup);
 			if ((NumWords & 0xFFFF0000) != 0) {
 				BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVKXi), AArch64::X15)
-            		  .addReg(AArch64::X15)
-					  .addImm((NumWords & 0xFFFF0000) >> 16) // High half
-					  .addImm(AArch64_AM::getShifterImm(AArch64_AM::LSL, 16))
-					  .setMIFlag(MachineInstr::FrameSetup);
+            								  .addReg(AArch64::X15)
+											  .addImm((NumWords & 0xFFFF0000) >> 16) // High half
+											  .addImm(AArch64_AM::getShifterImm(AArch64_AM::LSL, 16))
+											  .setMIFlag(MachineInstr::FrameSetup);
 				BuildMI(MBB, MBBI, DL, TII->get(AArch64::SEH_Nop))
 				.setMIFlag(MachineInstr::FrameSetup);
 			}
 		} else {
 			BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVi64imm), AArch64::X15)
-        		  .addImm(NumWords)
-				  .setMIFlags(MachineInstr::FrameSetup);
+        								  .addImm(NumWords)
+										  .setMIFlags(MachineInstr::FrameSetup);
 		}
 
 		switch (MF.getTarget().getCodeModel()) {
@@ -1353,8 +1353,8 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 			// formula computes the encoded immediate with all ones but
 			// NrBitsToZero zero bits as least significant bits.
 			uint32_t andMaskEncoded = (1 << 12)                         // = N
-                                		| ((64 - NrBitsToZero) << 6)      // immr
-										| ((64 - NrBitsToZero - 1) << 0); // imms
+                                								| ((64 - NrBitsToZero) << 6)      // immr
+																| ((64 - NrBitsToZero - 1) << 0); // imms
 
 			BuildMI(MBB, MBBI, DL, TII->get(AArch64::ANDXri), AArch64::SP)
 			.addReg(scratchSPReg, RegState::Kill)
@@ -1387,12 +1387,71 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		}
 	}
 
+
+	//Added for SORA
+	if (MFI.hasSORA()){
+		//Create a stack frame with 16-bytes constraint
+		int Count=4;
+		int AlignmentBytes=(Count+1)/2*16;
+		int AlignmentBytesForArg=AlignmentBytes/4;
+		int Saved=0;
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0)
+										.setMIFlags(MachineInstr::FrameSetup);
+
+
+		//Push return address
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameSetup);
+		//Save argument registers
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameSetup);
+
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X8).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameSetup);
+
+
+
+		//Set arguments
+
+		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameSetup);
+		//MOV  Xd|SP, Xn|SP    is equivalent to ADD Xd|SP, Xn|SP, #0
+		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(std::abs(0)).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(8).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+		//Make siphas24 call
+		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_mac").setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_mac").setMIFlags(MachineInstr::FrameSetup);
+
+		//Save return value to the special tag register
+		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X20).addReg(AArch64::XZR).addReg(AArch64::X0).setMIFlags(MachineInstr::FrameSetup);
+
+		//Restore argument registers
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X8).addReg(AArch64::SP).addImm(Count-Saved--)
+												.setMIFlags(MachineInstr::FrameSetup);
+
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
+										.setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--)
+										.setMIFlags(MachineInstr::FrameSetup);
+		//Pop return address
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::LR).addReg(AArch64::SP).addImm(Count-Saved--)
+										.setMIFlags(MachineInstr::FrameSetup);
+		//Remove the stack frame with 16-bytes constraint
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addReg(AArch64::X20).addReg(AArch64::XZR).addReg(AArch64::X9).setMIFlags(MachineInstr::FrameSetup);
+	}
+
 	// The very last FrameSetup instruction indicates the end of prologue. Emit a
 	// SEH opcode indicating the prologue end.
 	if (NeedsWinCFI && HasWinCFI) {
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::SEH_PrologEnd))
-        		.setMIFlag(MachineInstr::FrameSetup);
+        								.setMIFlag(MachineInstr::FrameSetup);
 	}
+
+
 
 	// SEH funclets are passed the frame pointer in X1.  If the parent
 	// function uses the base register, then the base register is used
@@ -1401,8 +1460,8 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		EHPersonality Per = classifyEHPersonality(F.getPersonalityFn());
 		if (isAsynchronousEHPersonality(Per)) {
 			BuildMI(MBB, MBBI, DL, TII->get(TargetOpcode::COPY), AArch64::FP)
-        		  .addReg(AArch64::X1)
-				  .setMIFlag(MachineInstr::FrameSetup);
+        								  .addReg(AArch64::X1)
+										  .setMIFlag(MachineInstr::FrameSetup);
 			MBB.addLiveIn(AArch64::X1);
 		}
 	}
@@ -1410,8 +1469,8 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 	if (needsFrameMoves) {
 		const DataLayout &TD = MF.getDataLayout();
 		const int StackGrowth = isTargetDarwin(MF)
-                                		? (2 * -TD.getPointerSize(0))
-                                				: -AFI->getCalleeSavedStackSize();
+                                								? (2 * -TD.getPointerSize(0))
+                                										: -AFI->getCalleeSavedStackSize();
 		Register FramePtr = RegInfo->getFrameRegister(MF);
 		// An example of the prologue:
 		//
@@ -1509,46 +1568,7 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		// LR if those are saved).
 		emitCalleeSavedFrameMoves(MBB, MBBI);
 	}
-	//Added for SORA
-	//	sub  sp, sp, #32     \\ Open up some temp stack space
-	//	   stp  x19, x20, [sp]  \\ save 2 pairs of registers
-	//	   stp  x21, x30, [sp,#16]
-	//	 <your code>
-	//	   ldp  x19, x20, [sp]  \\ restore 2 pairs of registers
-	//	   ldp  x21, x30, [sp,#16]
-	//	   add  sp, sp, #32
-	if (MFI.hasSORA()){
-		//Create a stack frame with 16-bytes constraint
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(32)).addImm(0)
-					.setMIFlags(MachineInstr::FrameSetup);
-		//Push return address
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(2)
-					.setMIFlags(MachineInstr::FrameSetup);
-		//Save argument registers
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(1)
-					.setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(0)
-					.setMIFlags(MachineInstr::FrameSetup);
 
-		//Set arguments
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::FMOVDXr)).addReg(AArch64::X0).addReg(AArch64::SP).setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(8).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_mac").setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_mac").setMIFlags(MachineInstr::FrameSetup);
-
-		//Save return value to the special tag register
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::FMOVDXr)).addReg(AArch64::X20).addReg(AArch64::X0).setMIFlags(MachineInstr::FrameSetup);
-		//Restore argument registers
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(0)
-					.setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(1)
-					.setMIFlags(MachineInstr::FrameSetup);
-		//Pop return address
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(2)
-					.setMIFlags(MachineInstr::FrameSetup);
-		//Remove the stack frame with 16-bytes constraint
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(32)).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-	}
 }
 
 static void InsertReturnAddressAuth(MachineFunction &MF,
@@ -1571,13 +1591,13 @@ static void InsertReturnAddressAuth(MachineFunction &MF,
 			MBBI->getOpcode() == AArch64::RET_ReallyLR) {
 		BuildMI(MBB, MBBI, DL,
 				TII->get(ShouldSignWithAKey(MF) ? AArch64::RETAA : AArch64::RETAB))
-        		.copyImplicitOps(*MBBI);
+        								.copyImplicitOps(*MBBI);
 		MBB.erase(MBBI);
 	} else {
 		BuildMI(
 				MBB, MBBI, DL,
 				TII->get(ShouldSignWithAKey(MF) ? AArch64::AUTIASP : AArch64::AUTIBSP))
-        		.setMIFlag(MachineInstr::FrameDestroy);
+        								.setMIFlag(MachineInstr::FrameDestroy);
 	}
 }
 
@@ -1712,39 +1732,48 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
 	}
 
 	if (MF.getFrameInfo().hasSORA()){
+		int SpillBytes=8;
+		int Count=5;
+		int AlignmentBytes=(Count+1)/2*16;
+		int Saved=0;
 		//Create a stack frame with 16-bytes constraint
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(32)).addImm(0)
-				.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0)
+										.setMIFlags(MachineInstr::FrameDestroy);
 		//Push return address
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(3)
-								.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(Count-++Saved)
+														.setMIFlags(MachineInstr::FrameDestroy);
 		//Save argument registers
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(2)
-				.setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(1)
-				.setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(0)
-				.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X8).addReg(AArch64::SP).addImm(Count-++Saved)
+												.setMIFlags(MachineInstr::FrameDestroy);
+
 		//Set arguments
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::FMOVDXr)).addReg(AArch64::X0).addReg(AArch64::SP).setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(8).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X2).addImm(1).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::FMOVDXr)).addReg(AArch64::X2).addReg(AArch64::X20).setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytes).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X2).addReg(AArch64::XZR).addReg(AArch64::X20).setMIFlags(MachineInstr::FrameDestroy);
 		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_check").setMIFlags(MachineInstr::FrameDestroy);
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_check").setMIFlags(MachineInstr::FrameDestroy);
 
 		//Restore argument registers
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(0)
-				.setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(1)
-				.setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(2)
-				.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X8).addReg(AArch64::SP).addImm(Count-Saved--)
+												.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
+										.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
+										.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--)
+										.setMIFlags(MachineInstr::FrameDestroy);
 		//Pop return address
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(3)
-								.setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::LR).addReg(AArch64::SP).addImm(Count-Saved--)
+														.setMIFlags(MachineInstr::FrameDestroy);
 		//Remove the stack frame with 16-bytes constraint
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(32)).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
 	}
 
 	const StackOffset &SVEStackSize = getSVEStackSize(MF);
@@ -1919,7 +1948,7 @@ static StackOffset getFPOffset(const MachineFunction &MF, int64_t ObjectOffset) 
 	unsigned FixedObject =
 			getFixedObjectSize(MF, AFI, IsWin64, /*IsFunclet=*/false);
 	unsigned FPAdjust = isTargetDarwin(MF)
-                        		? 16 : AFI->getCalleeSavedStackSize(MF.getFrameInfo());
+                        								? 16 : AFI->getCalleeSavedStackSize(MF.getFrameInfo());
 	return {ObjectOffset + FixedObject + FPAdjust, MVT::i8};
 }
 
@@ -2330,11 +2359,11 @@ bool AArch64FrameLowering::spillCalleeSavedRegisters(
 	if (NeedShadowCallStackProlog) {
 		// Shadow call stack prolog: str x30, [x18], #8
 		BuildMI(MBB, MI, DL, TII.get(AArch64::STRXpost))
-        		.addReg(AArch64::X18, RegState::Define)
-				.addReg(AArch64::LR)
-				.addReg(AArch64::X18)
-				.addImm(8)
-				.setMIFlag(MachineInstr::FrameSetup);
+        								.addReg(AArch64::X18, RegState::Define)
+										.addReg(AArch64::LR)
+										.addReg(AArch64::X18)
+										.addImm(8)
+										.setMIFlag(MachineInstr::FrameSetup);
 
 		if (NeedsWinCFI)
 			BuildMI(MBB, MI, DL, TII.get(AArch64::SEH_Nop))
@@ -2436,10 +2465,10 @@ bool AArch64FrameLowering::spillCalleeSavedRegisters(
 					MachineMemOperand::MOStore, Size, Alignment));
 		}
 		MIB.addReg(Reg1, getPrologueDeath(MF, Reg1))
-        		.addReg(AArch64::SP)
-				.addImm(RPI.Offset) // [sp, #offset*scale],
-				// where factor*scale is implicit
-				.setMIFlag(MachineInstr::FrameSetup);
+        								.addReg(AArch64::SP)
+										.addImm(RPI.Offset) // [sp, #offset*scale],
+										// where factor*scale is implicit
+										.setMIFlag(MachineInstr::FrameSetup);
 		MIB.addMemOperand(MF.getMachineMemOperand(
 				MachinePointerInfo::getFixedStack(MF, FrameIdxReg1),
 				MachineMemOperand::MOStore, Size, Alignment));
@@ -2536,10 +2565,10 @@ bool AArch64FrameLowering::restoreCalleeSavedRegisters(
 					MachineMemOperand::MOLoad, Size, Alignment));
 		}
 		MIB.addReg(Reg1, getDefRegState(true))
-        		.addReg(AArch64::SP)
-				.addImm(RPI.Offset) // [sp, #offset*scale]
-				// where factor*scale is implicit
-				.setMIFlag(MachineInstr::FrameDestroy);
+        								.addReg(AArch64::SP)
+										.addImm(RPI.Offset) // [sp, #offset*scale]
+										// where factor*scale is implicit
+										.setMIFlag(MachineInstr::FrameDestroy);
 		MIB.addMemOperand(MF.getMachineMemOperand(
 				MachinePointerInfo::getFixedStack(MF, FrameIdxReg1),
 				MachineMemOperand::MOLoad, Size, Alignment));
@@ -2564,11 +2593,11 @@ bool AArch64FrameLowering::restoreCalleeSavedRegisters(
 	if (NeedShadowCallStackProlog) {
 		// Shadow call stack epilog: ldr x30, [x18, #-8]!
 		BuildMI(MBB, MI, DL, TII.get(AArch64::LDRXpre))
-        		.addReg(AArch64::X18, RegState::Define)
-				.addReg(AArch64::LR, RegState::Define)
-				.addReg(AArch64::X18)
-				.addImm(-8)
-				.setMIFlag(MachineInstr::FrameDestroy);
+        								.addReg(AArch64::X18, RegState::Define)
+										.addReg(AArch64::LR, RegState::Define)
+										.addReg(AArch64::X18)
+										.addImm(-8)
+										.setMIFlag(MachineInstr::FrameDestroy);
 	}
 
 	return true;
@@ -2594,8 +2623,8 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
 	const MCPhysReg *CSRegs = MF.getRegInfo().getCalleeSavedRegs();
 
 	unsigned BasePointerReg = RegInfo->hasBasePointer(MF)
-                                		? RegInfo->getBaseRegister()
-                                				: (unsigned)AArch64::NoRegister;
+                                								? RegInfo->getBaseRegister()
+                                										: (unsigned)AArch64::NoRegister;
 
 	unsigned ExtraCSSpill = 0;
 	// Figure out which callee-saved registers to save/restore.
@@ -2607,7 +2636,7 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
 			SavedRegs.set(Reg);
 
 		//Added for SORA
-		if (Reg == AArch64::X20)
+		if (Reg == AArch64::X20 && MFI.hasSORA())
 			SavedRegs.set(Reg);
 
 		bool RegUsed = SavedRegs.test(Reg);
@@ -2676,7 +2705,7 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
 	LLVM_DEBUG(dbgs() << "*** determineCalleeSaves\nSaved CSRs:";
 	for (unsigned Reg
 			: SavedRegs.set_bits()) dbgs()
-            		 << ' ' << printReg(Reg, RegInfo);
+            								 << ' ' << printReg(Reg, RegInfo);
 	dbgs() << "\n";);
 
 	// If any callee-saved registers are used, the frame cannot be eliminated.
@@ -2785,64 +2814,64 @@ static int64_t determineSVEStackObjectOffsets(MachineFrameInfo &MFI,
 		int &MaxCSFrameIndex,
 		bool AssignOffsets) {
 #ifndef NDEBUG
-// First process all fixed stack objects.
-for (int I = MFI.getObjectIndexBegin(); I != 0; ++I)
-	assert(MFI.getStackID(I) != TargetStackID::SVEVector &&
-			"SVE vectors should never be passed on the stack by value, only by "
-			"reference.");
+	// First process all fixed stack objects.
+	for (int I = MFI.getObjectIndexBegin(); I != 0; ++I)
+		assert(MFI.getStackID(I) != TargetStackID::SVEVector &&
+				"SVE vectors should never be passed on the stack by value, only by "
+				"reference.");
 #endif
 
-auto Assign = [&MFI](int FI, int64_t Offset) {
-	LLVM_DEBUG(dbgs() << "alloc FI(" << FI << ") at SP[" << Offset << "]\n");
-	MFI.setObjectOffset(FI, Offset);
-};
+	auto Assign = [&MFI](int FI, int64_t Offset) {
+		LLVM_DEBUG(dbgs() << "alloc FI(" << FI << ") at SP[" << Offset << "]\n");
+		MFI.setObjectOffset(FI, Offset);
+	};
 
-int64_t Offset = 0;
+	int64_t Offset = 0;
 
-// Then process all callee saved slots.
-if (getSVECalleeSaveSlotRange(MFI, MinCSFrameIndex, MaxCSFrameIndex)) {
-	// Assign offsets to the callee save slots.
-	for (int I = MinCSFrameIndex; I <= MaxCSFrameIndex; ++I) {
-		Offset += MFI.getObjectSize(I);
-		Offset = alignTo(Offset, MFI.getObjectAlign(I));
-		if (AssignOffsets)
-			Assign(I, -Offset);
+	// Then process all callee saved slots.
+	if (getSVECalleeSaveSlotRange(MFI, MinCSFrameIndex, MaxCSFrameIndex)) {
+		// Assign offsets to the callee save slots.
+		for (int I = MinCSFrameIndex; I <= MaxCSFrameIndex; ++I) {
+			Offset += MFI.getObjectSize(I);
+			Offset = alignTo(Offset, MFI.getObjectAlign(I));
+			if (AssignOffsets)
+				Assign(I, -Offset);
+		}
 	}
-}
 
-// Ensure that the Callee-save area is aligned to 16bytes.
-Offset = alignTo(Offset, Align(16U));
+	// Ensure that the Callee-save area is aligned to 16bytes.
+	Offset = alignTo(Offset, Align(16U));
 
-// Create a buffer of SVE objects to allocate and sort it.
-SmallVector<int, 8> ObjectsToAllocate;
-for (int I = 0, E = MFI.getObjectIndexEnd(); I != E; ++I) {
-	unsigned StackID = MFI.getStackID(I);
-	if (StackID != TargetStackID::SVEVector)
-		continue;
-	if (MaxCSFrameIndex >= I && I >= MinCSFrameIndex)
-		continue;
-	if (MFI.isDeadObjectIndex(I))
-		continue;
+	// Create a buffer of SVE objects to allocate and sort it.
+	SmallVector<int, 8> ObjectsToAllocate;
+	for (int I = 0, E = MFI.getObjectIndexEnd(); I != E; ++I) {
+		unsigned StackID = MFI.getStackID(I);
+		if (StackID != TargetStackID::SVEVector)
+			continue;
+		if (MaxCSFrameIndex >= I && I >= MinCSFrameIndex)
+			continue;
+		if (MFI.isDeadObjectIndex(I))
+			continue;
 
-	ObjectsToAllocate.push_back(I);
-}
+		ObjectsToAllocate.push_back(I);
+	}
 
-// Allocate all SVE locals and spills
-for (unsigned FI : ObjectsToAllocate) {
-	Align Alignment = MFI.getObjectAlign(FI);
-	// FIXME: Given that the length of SVE vectors is not necessarily a power of
-	// two, we'd need to align every object dynamically at runtime if the
-	// alignment is larger than 16. This is not yet supported.
-	if (Alignment > Align(16))
-		report_fatal_error(
-				"Alignment of scalable vectors > 16 bytes is not yet supported");
+	// Allocate all SVE locals and spills
+	for (unsigned FI : ObjectsToAllocate) {
+		Align Alignment = MFI.getObjectAlign(FI);
+		// FIXME: Given that the length of SVE vectors is not necessarily a power of
+		// two, we'd need to align every object dynamically at runtime if the
+		// alignment is larger than 16. This is not yet supported.
+		if (Alignment > Align(16))
+			report_fatal_error(
+					"Alignment of scalable vectors > 16 bytes is not yet supported");
 
-	Offset = alignTo(Offset + MFI.getObjectSize(FI), Alignment);
-	if (AssignOffsets)
-		Assign(FI, -Offset);
-}
+		Offset = alignTo(Offset + MFI.getObjectSize(FI), Alignment);
+		if (AssignOffsets)
+			Assign(FI, -Offset);
+	}
 
-return Offset;
+	return Offset;
 }
 
 int64_t AArch64FrameLowering::estimateSVEStackObjectOffsets(
@@ -2989,10 +3018,10 @@ void TagStoreEdit::emitUnrolled(MachineBasicBlock::iterator InsertI) {
 				? (ZeroData ? AArch64::STZGOffset : AArch64::STGOffset)
 						: (ZeroData ? AArch64::STZ2GOffset : AArch64::ST2GOffset);
 		MachineInstr *I = BuildMI(*MBB, InsertI, DL, TII->get(Opcode))
-                        		  .addReg(AArch64::SP)
-								  .addReg(BaseReg)
-								  .addImm(BaseRegOffsetBytes / 16)
-								  .setMemRefs(CombinedMemRefs);
+                        								  .addReg(AArch64::SP)
+														  .addReg(BaseReg)
+														  .addImm(BaseRegOffsetBytes / 16)
+														  .setMemRefs(CombinedMemRefs);
 		// A store to [BaseReg, #0] should go last for an opportunity to fold the
 		// final SP adjustment in the epilogue.
 		if (BaseRegOffsetBytes == 0)
@@ -3024,11 +3053,11 @@ void TagStoreEdit::emitLoop(MachineBasicBlock::iterator InsertI) {
 	MachineInstr *LoopI = BuildMI(*MBB, InsertI, DL,
 			TII->get(ZeroData ? AArch64::STZGloop_wback
 					: AArch64::STGloop_wback))
-                            		.addDef(SizeReg)
-									.addDef(BaseReg)
-									.addImm(LoopSize)
-									.addReg(BaseReg)
-									.setMemRefs(CombinedMemRefs);
+                            								.addDef(SizeReg)
+															.addDef(BaseReg)
+															.addImm(LoopSize)
+															.addReg(BaseReg)
+															.setMemRefs(CombinedMemRefs);
 	if (FrameRegUpdate)
 		LoopI->setFlags(FrameRegUpdateFlags);
 
@@ -3051,11 +3080,11 @@ void TagStoreEdit::emitLoop(MachineBasicBlock::iterator InsertI) {
 		BuildMI(
 				*MBB, InsertI, DL,
 				TII->get(ExtraBaseRegUpdate > 0 ? AArch64::ADDXri : AArch64::SUBXri))
-        		.addDef(BaseReg)
-				.addReg(BaseReg)
-				.addImm(std::abs(ExtraBaseRegUpdate))
-				.addImm(0)
-				.setMIFlags(FrameRegUpdateFlags);
+        								.addDef(BaseReg)
+										.addReg(BaseReg)
+										.addImm(std::abs(ExtraBaseRegUpdate))
+										.addImm(0)
+										.setMIFlags(FrameRegUpdateFlags);
 	}
 }
 

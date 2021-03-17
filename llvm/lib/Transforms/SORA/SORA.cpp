@@ -24,6 +24,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <fstream>
@@ -39,42 +40,69 @@ std::string getHomePath(){
     std::string Path(getenv("HOME"));
     return Path;
 }
+std::string roundDouble(const double number){
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(1) << number; // set # places after decimal
+    return ss.str();
+}
 class SORAVariableCounter : public ModulePass {
 public:
     static char ID; // Pass identification, replacement for typeid
     std::ofstream file;
+    std::ofstream fileAvg;
     SORAVariableCounter() : ModulePass(ID) {}
     bool runOnModule(Module &M) override {
         std::string ModuleStr=M.getName().str();
         std::size_t LastIndex=ModuleStr.rfind("/");
-        std::string FilePath=getHomePath()+"/LLVM/Files/count" + ModuleStr.substr(LastIndex+1) +".tsv";
+        std::string FilePath=getHomePath()+"/LLVM/Files/count-" + ModuleStr.substr(LastIndex+1) +".tsv";
+        std::string AverageFilePath=getHomePath()+"/LLVM/Files/count-Average.tsv";
         file.open(FilePath);
+        fileAvg.open(AverageFilePath,std::ios_base::app);
         outs() << "Stats for" << M.getName() << "\n";
         file << "Stats for" << M.getName().str() << "\n";
         outs() << "Function" << "\t" << "Variable" << "\t" << "Address" << "\t" << "Argument" << "\n";
         file << "Function" << "\t" << "Variable" << "\t" << "Address" << "\t" << "Argument" << "\n";
+        //fileAvg << "Function" << "\t" << "Variable" << "\t" << "Address" << "\t" << "Argument" << "\n";
+        int TotalArgCount=0;
+        int TotalLocalVarCount=0;
+        int TotalStackAddressCount=0;
+        int FunctionCount=0;
         for (Function &F:M){
             int ArgCount=0;
             int LocalVarCount=0;
             int StackAddressCount=0;
-            if (F.empty())
+            if (F.empty() || F.getName().startswith("sip24"))
                 continue;
+            FunctionCount++;
             ArgCount=F.arg_size();
+            TotalArgCount+=ArgCount;
             for (auto I = inst_begin(F); I!=inst_end(F);++I){
                 Instruction* Inst=&*I;
                 if (AllocaInst* Alloca = dyn_cast<AllocaInst>(Inst)) {
                     LocalVarCount++;
                     Type* Type=Alloca->getAllocatedType();
-                    if (isa<ArrayType>(Type))
+                    if (isa<ArrayType>(Type)){
                         StackAddressCount+=Type->getArrayNumElements();
-                    else
+                    }
+                    else{
                         StackAddressCount++;
+                    }
+
                 }
             }
+            TotalLocalVarCount+=LocalVarCount;
+            TotalStackAddressCount+=StackAddressCount;
             outs() << F.getName() << "\t" << LocalVarCount << "\t" << StackAddressCount << "\t" << ArgCount << "\n";
             file << F.getName().str() << "\t" << LocalVarCount << "\t" << StackAddressCount << "\t" << ArgCount << "\n";
         }
+        double AvgLocalVarCount=((double)TotalLocalVarCount/(double)FunctionCount);
+        double AvgStackAddressCount=((double)TotalStackAddressCount/(double)FunctionCount);
+        double AvgArgCount=((double)TotalArgCount/(double)FunctionCount);
+        outs() << ModuleStr << "\t" << roundDouble(AvgLocalVarCount) << "\t" << roundDouble(AvgStackAddressCount) << "\t" << roundDouble(AvgArgCount) << "\n";
+        file << ModuleStr << "\t" << roundDouble(AvgLocalVarCount) << "\t" << roundDouble(AvgStackAddressCount) << "\t" << roundDouble(AvgArgCount) << "\n";
+        fileAvg << ModuleStr << "\t" << roundDouble(AvgLocalVarCount) << "\t" << roundDouble(AvgStackAddressCount) << "\t" << roundDouble(AvgArgCount) << "\n";
         file.close();
+        fileAvg.close();
         return false;
     }
 };
