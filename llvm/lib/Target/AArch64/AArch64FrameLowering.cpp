@@ -1391,16 +1391,12 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 	//Added for SORA
 	if (MFI.hasSORA()){
 		//Create a stack frame with 16-bytes constraint
-		int Count=4;
+		unsigned SpillBytesSize=AFI->getCalleeSavedStackSize();
+		int Count=2;
 		int AlignmentBytes=(Count+1)/2*16;
-		int AlignmentBytesForArg=AlignmentBytes/4;
 		int Saved=0;
+		//Create a stack frame with 16-bytes constraint
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0)
-										.setMIFlags(MachineInstr::FrameSetup);
-
-
-		//Push return address
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(Count-++Saved)
 										.setMIFlags(MachineInstr::FrameSetup);
 		//Save argument registers
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(Count-++Saved)
@@ -1408,40 +1404,28 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved)
 										.setMIFlags(MachineInstr::FrameSetup);
 
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X8).addReg(AArch64::SP).addImm(Count-++Saved)
-										.setMIFlags(MachineInstr::FrameSetup);
-
-
-
 		//Set arguments
-
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameSetup);
 		//MOV  Xd|SP, Xn|SP    is equivalent to ADD Xd|SP, Xn|SP, #0
 		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(std::abs(0)).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(8).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+
 		//Make siphas24 call
-		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_mac").setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_mac").setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_mac").setMIFlags(MachineInstr::FrameSetup);
+		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_mac").setMIFlags(MachineInstr::FrameSetup);
 
 		//Save return value to the special tag register
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X20).addReg(AArch64::XZR).addReg(AArch64::X0).setMIFlags(MachineInstr::FrameSetup);
 
 		//Restore argument registers
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X8).addReg(AArch64::SP).addImm(Count-Saved--)
-												.setMIFlags(MachineInstr::FrameSetup);
-
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameSetup);
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameSetup);
-		//Pop return address
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::LR).addReg(AArch64::SP).addImm(Count-Saved--)
-										.setMIFlags(MachineInstr::FrameSetup);
 		//Remove the stack frame with 16-bytes constraint
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addReg(AArch64::X20).addReg(AArch64::XZR).addReg(AArch64::X9).setMIFlags(MachineInstr::FrameSetup);
 	}
 
 	// The very last FrameSetup instruction indicates the end of prologue. Emit a
@@ -1732,16 +1716,13 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
 	}
 
 	if (MF.getFrameInfo().hasSORA()){
-		int SpillBytes=8;
-		int Count=5;
+		unsigned SpillBytesSize=AFI->getCalleeSavedStackSize();
+		int Count=3;
 		int AlignmentBytes=(Count+1)/2*16;
 		int Saved=0;
 		//Create a stack frame with 16-bytes constraint
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0)
 										.setMIFlags(MachineInstr::FrameDestroy);
-		//Push return address
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::LR).addReg(AArch64::SP).addImm(Count-++Saved)
-														.setMIFlags(MachineInstr::FrameDestroy);
 		//Save argument registers
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(Count-++Saved)
 										.setMIFlags(MachineInstr::FrameDestroy);
@@ -1749,29 +1730,23 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
 										.setMIFlags(MachineInstr::FrameDestroy);
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(Count-++Saved)
 										.setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X8).addReg(AArch64::SP).addImm(Count-++Saved)
-												.setMIFlags(MachineInstr::FrameDestroy);
 
 		//Set arguments
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytes).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-
+		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X2).addReg(AArch64::XZR).addReg(AArch64::X20).setMIFlags(MachineInstr::FrameDestroy);
-		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_check").setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_check").setMIFlags(MachineInstr::FrameDestroy);
+
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_check").setMIFlags(MachineInstr::FrameDestroy);
+		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_check").setMIFlags(MachineInstr::FrameDestroy);
 
 		//Restore argument registers
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X8).addReg(AArch64::SP).addImm(Count-Saved--)
-												.setMIFlags(MachineInstr::FrameDestroy);
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameDestroy);
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameDestroy);
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameDestroy);
-		//Pop return address
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::LR).addReg(AArch64::SP).addImm(Count-Saved--)
-														.setMIFlags(MachineInstr::FrameDestroy);
 		//Remove the stack frame with 16-bytes constraint
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
 	}
@@ -2627,6 +2602,7 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
                                 										: (unsigned)AArch64::NoRegister;
 
 	unsigned ExtraCSSpill = 0;
+
 	// Figure out which callee-saved registers to save/restore.
 	for (unsigned i = 0; CSRegs[i]; ++i) {
 		const unsigned Reg = CSRegs[i];
@@ -2636,8 +2612,9 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
 			SavedRegs.set(Reg);
 
 		//Added for SORA
-		if (Reg == AArch64::X20 && MFI.hasSORA())
+		if (Reg == AArch64::X20 && MFI.hasSORA()){
 			SavedRegs.set(Reg);
+		}
 
 		bool RegUsed = SavedRegs.test(Reg);
 		unsigned PairedReg = AArch64::NoRegister;
@@ -2647,8 +2624,8 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
 			PairedReg = CSRegs[i ^ 1];
 
 		if (!RegUsed) {
-			if (AArch64::GPR64RegClass.contains(Reg) &&
-					!RegInfo->isReservedReg(MF, Reg)) {
+			if (AArch64::GPR64RegClass.contains(Reg) && !RegInfo->isReservedReg(MF, Reg)) {
+			//if (AArch64::GPR64RegClass.contains(Reg) && (!RegInfo->isReservedReg(MF, Reg) || (PairedReg==AArch64::X20 && MFI.hasSORA()))) {
 				UnspilledCSGPR = Reg;
 				UnspilledCSGPRPaired = PairedReg;
 			}
@@ -2658,11 +2635,21 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
 		// MachO's compact unwind format relies on all registers being stored in
 		// pairs.
 		// FIXME: the usual format is actually better if unwinding isn't needed.
-		if (produceCompactUnwindFrame(MF) && PairedReg != AArch64::NoRegister &&
-				!SavedRegs.test(PairedReg)) {
+		// Modified for SORA since unpaired spill breaks the integrity of spill area when the compiler uses empty 8-byte slot during the function body
+		//		stp	x29, x30, [sp, #16]             // 16-byte Folded Spill
+		//		str	x23, [sp, #32]                  // 8-byte Folded Spill
+		//		stp	x22, x21, [sp, #48]             // 16-byte Folded Spill
+		//		stp	x20, x19, [sp, #64]
+		// 		becomes......
+		//		stp	x29, x30, [sp, #32]             // 16-byte Folded Spill
+		//		stp	x24, x23, [sp, #48]             // 16-byte Folded Spill
+		//		stp	x22, x21, [sp, #64]             // 16-byte Folded Spill
+		//		stp	x20, x19, [sp, #80]
+		//if (produceCompactUnwindFrame(MF) && PairedReg != AArch64::NoRegister && !SavedRegs.test(PairedReg) ) {
+		if ((produceCompactUnwindFrame(MF)|| MFI.hasSORA()) && PairedReg != AArch64::NoRegister && !SavedRegs.test(PairedReg) ) {
 			SavedRegs.set(PairedReg);
-			if (AArch64::GPR64RegClass.contains(PairedReg) &&
-					!RegInfo->isReservedReg(MF, PairedReg))
+			if (AArch64::GPR64RegClass.contains(PairedReg) && !RegInfo->isReservedReg(MF, PairedReg))
+			//if (AArch64::GPR64RegClass.contains(PairedReg) && (!(RegInfo->isReservedReg(MF, PairedReg) || (PairedReg==AArch64::X20 && MFI.hasSORA()))))
 				ExtraCSSpill = PairedReg;
 		}
 	}
