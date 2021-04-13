@@ -1392,7 +1392,8 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 	if (MFI.hasSORA()){
 		//Create a stack frame with 16-bytes constraint
 		unsigned SpillBytesSize=AFI->getCalleeSavedStackSize();
-		int Count=2;
+		//Number of registers to be spilled for the call
+        int Count=2;
 		int AlignmentBytes=(Count+1)/2*16;
 		int Saved=0;
 		//Create a stack frame with 16-bytes constraint
@@ -1403,15 +1404,17 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 										.setMIFlags(MachineInstr::FrameSetup);
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved)
 										.setMIFlags(MachineInstr::FrameSetup);
-
 		//Set arguments
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameSetup);
-		//MOV  Xd|SP, Xn|SP    is equivalent to ADD Xd|SP, Xn|SP, #0
-		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(std::abs(0)).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-
-		//Make siphas24 call
+        
+        //MOV  Xd|SP, Xn|SP    is equivalent to ADD Xd|SP, Xn|SP, #0
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+        
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+        
+        
+		//Make siphash24 call
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_mac").setMIFlags(MachineInstr::FrameSetup);
 		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_mac").setMIFlags(MachineInstr::FrameSetup);
 
@@ -1420,7 +1423,7 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X20).addReg(AArch64::XZR).addReg(AArch64::X0).setMIFlags(MachineInstr::FrameSetup);
 
 		//Restore argument registers
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameSetup);
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameSetup);
@@ -1731,17 +1734,20 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(Count-++Saved)
 										.setMIFlags(MachineInstr::FrameDestroy);
 
-		//Set arguments
+        //Set arguments
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameDestroy);
-		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X2).addReg(AArch64::XZR).addReg(AArch64::X20).setMIFlags(MachineInstr::FrameDestroy);
+        
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+        
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+            
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X2).addReg(AArch64::XZR).addReg(AArch64::X20).setMIFlags(MachineInstr::FrameDestroy);
 
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_check").setMIFlags(MachineInstr::FrameDestroy);
 		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_check").setMIFlags(MachineInstr::FrameDestroy);
 
 		//Restore argument registers
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameDestroy);
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameDestroy);
