@@ -1417,7 +1417,7 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
         else{
             //BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
             
-            BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+            BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
         }
         
 		//Make siphash24 call
@@ -1751,7 +1751,7 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
         else{
             //BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
             
-            BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+            BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
 
         }
     
