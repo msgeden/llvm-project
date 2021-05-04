@@ -1408,11 +1408,17 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameSetup);
         
-        //MOV  Xd|SP, Xn|SP    is equivalent to ADD Xd|SP, Xn|SP, #0
-        BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+        if (isTargetDarwin(MF)){
+            //MOV  Xd|SP, Xn|SP    is equivalent to ADD Xd|SP, Xn|SP, #0
+            BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
         
-        BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-        
+            BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+        }
+        else{
+            //BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+            
+            BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
+        }
         
 		//Make siphash24 call
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_mac").setMIFlags(MachineInstr::FrameSetup);
@@ -1737,10 +1743,18 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
         //Set arguments
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameDestroy);
         
-        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-        
-        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+        if (isTargetDarwin(MF)){
+                BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+                
+                BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+        }
+        else{
+            //BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
             
+            BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
+
+        }
+    
         BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X2).addReg(AArch64::XZR).addReg(AArch64::X20).setMIFlags(MachineInstr::FrameDestroy);
 
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_check").setMIFlags(MachineInstr::FrameDestroy);
