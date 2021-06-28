@@ -2052,7 +2052,7 @@ void X86FrameLowering::emitEpilogue(MachineFunction &MF,
             BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(MFI.getSORASize()+8);
             //Generate tag for the values to restored check their integrity with prologue value (RBX) within the function
             BuildMI(MBB,MBBI,DL,TII.get(X86::MOV64rr)).addReg(X86::RDX).addReg(X86::RBX);
-            BuildMI(MBB, MBBI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("sip24_0f36896_check");
+            BuildMI(MBB, MBBI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("__register_check");
 
 
             //Restore all registers
@@ -2635,7 +2635,7 @@ bool X86FrameLowering::spillCalleeSavedRegisters(
         //Set the size of spill area (+8 is for return address)
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(MFI.getSORASize()+8);
         //Generate tag for spilled values through SipHash-2-4
-        BuildMI(MBB, MI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("sip24_0f36896_mac");
+        BuildMI(MBB, MI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("__register_mac");
         //Keep 64-bit tag on the reserved RBX register
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64rr)).addReg(X86::RBX).addReg(X86::RAX);
 
@@ -2752,7 +2752,7 @@ bool X86FrameLowering::restoreCalleeSavedRegisters(
         BuildMI(MBB,MI,DL,TII.get(X86::MOV64ri)).addReg(X86::RSI).addImm(MFI.getSORASize()+8);
         //Generate tag for the values to be restored and check their integrity with prologue value (RBX) within the function
         BuildMI(MBB, MI, DL, TII.get(X86::MOV64rr)).addReg(X86::RDX).addReg(X86::RBX);
-        BuildMI(MBB, MI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("sip24_0f36896_check");
+        BuildMI(MBB, MI, DL, TII.get(X86::CALL64pcrel32)).addExternalSymbol("__register_check");
 
 
         //Restore all registers
