@@ -1407,22 +1407,22 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		//Set arguments
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameSetup);
-        
+
         if (isTargetDarwin(MF)){
             //MOV  Xd|SP, Xn|SP    is equivalent to ADD Xd|SP, Xn|SP, #0
             BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-        
+
             BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
         }
         else{
             //BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameSetup);
-            
+
             BuildMI(MBB, MBBI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameSetup);
         }
-        
+
 		//Make siphash24 call
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_mac").setMIFlags(MachineInstr::FrameSetup);
-		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_mac").setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("__register_mac").setMIFlags(MachineInstr::FrameSetup);
+		//BuildMI(MBB, MBBI, DL, TII->get(AArch64::BL)).addExternalSymbol("__register_mac_mockup").setMIFlags(MachineInstr::FrameSetup);
 
 		//Save return value to the special tag register
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
@@ -1742,23 +1742,23 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
 
         //Set arguments
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameDestroy);
-        
+
         if (isTargetDarwin(MF)){
                 BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-                
+
                 BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
         }
         else{
             //BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::X0).addReg(AArch64::X0).addImm(SpillBytesSize-16).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
-            
+
             BuildMI(MBB, LastPopI, DL, TII->get(AArch64::MOVZXi),AArch64::X1).addImm(SpillBytesSize).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
 
         }
-    
+
         BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X2).addReg(AArch64::XZR).addReg(AArch64::X20).setMIFlags(MachineInstr::FrameDestroy);
 
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_0f36896_check").setMIFlags(MachineInstr::FrameDestroy);
-		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("sip24_check").setMIFlags(MachineInstr::FrameDestroy);
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("__register_check").setMIFlags(MachineInstr::FrameDestroy);
+		//BuildMI(MBB, LastPopI, DL, TII->get(AArch64::BL)).addExternalSymbol("__register_check_mockup").setMIFlags(MachineInstr::FrameDestroy);
 
 		//Restore argument registers
         BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
@@ -2119,9 +2119,7 @@ static unsigned getPrologueDeath(MachineFunction &MF, unsigned Reg) {
 static bool produceCompactUnwindFrame(MachineFunction &MF) {
 	const AArch64Subtarget &Subtarget = MF.getSubtarget<AArch64Subtarget>();
 	AttributeList Attrs = MF.getFunction().getAttributes();
-	return Subtarget.isTargetMachO() &&
-			!(Subtarget.getTargetLowering()->supportSwiftError() &&
-					Attrs.hasAttrSomewhere(Attribute::SwiftError));
+	return Subtarget.isTargetMachO() && !(Subtarget.getTargetLowering()->supportSwiftError() && Attrs.hasAttrSomewhere(Attribute::SwiftError));
 }
 
 static bool invalidateWindowsRegisterPairing(unsigned Reg1, unsigned Reg2,
@@ -2744,7 +2742,9 @@ void AArch64FrameLowering::determineCalleeSaves(MachineFunction &MF,
 			// MachO's compact unwind format relies on all registers being stored in
 			// pairs, so if we need to spill one extra for BigStack, then we need to
 			// store the pair.
-			if (produceCompactUnwindFrame(MF))
+			//Modified for SORA regarding unpaired spills
+			//if (produceCompactUnwindFrame(MF))
+			if (produceCompactUnwindFrame(MF)|| MFI.hasSORA())
 				SavedRegs.set(UnspilledCSGPRPaired);
 			ExtraCSSpill = UnspilledCSGPR;
 		}
