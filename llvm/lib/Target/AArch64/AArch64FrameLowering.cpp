@@ -1395,18 +1395,34 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		//Number of registers to be spilled for the call
         //int Count=3;
         int GPRCount=3;
-        int FPRCount=0;
+        int FPRCount=8;
 		int AlignmentBytes=(2*FPRCount+GPRCount+1)/2*16;
-     	//int Count=AlignmentBytes/16;
-		int Count=GPRCount+FPRCount;
-		int Saved=0;
+     	int WordCount=AlignmentBytes/8;
+		int Count=GPRCount;
+        int Saved=0;
+		int WordSaved=0;
+        
 		//Create a stack frame with 16-bytes constraint
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0)
 										.setMIFlags(MachineInstr::FrameSetup);
 		
         //Save FPRs for SHA calculations
-        // BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q0).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
-        // BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q1).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q0).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q1).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q2).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q3).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q4).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q5).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q6).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q7).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q2).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q3).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q4).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
@@ -1415,11 +1431,14 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q7).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
         
        	//Save argument registers
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=1;
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=1;
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameSetup);
          
         //BuildMI(MBB, MBBI, DL, TII->get(AArch64::STPQi)).addReg(AArch64::X0).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
-        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved+=1;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameSetup);
 
 		//Set arguments
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
@@ -1448,14 +1467,16 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
         
         
 		//Restore GPR argument registers
-        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm((WordCount-WordSaved))
 										.setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=1;
 
         //BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDPQi)).addDef(AArch64::X0).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
 
-        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
-		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
-        
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=1;
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=1;
         //Restore FPR argument registers for SHA calculations
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q7).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q6).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
@@ -1463,9 +1484,22 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q4).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q3).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
         // BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q2).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
-        // BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q1).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
-        // BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q0).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
-        
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q7).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q6).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q5).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q4).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q3).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q2).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q1).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q0).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameSetup);
+        WordSaved-=2;
         
 		//Remove the stack frame with 16-bytes constraint
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0).setMIFlags(MachineInstr::FrameSetup);
@@ -1764,26 +1798,30 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
 		//int AlignmentBytes=(Count+1)/2*16;
 		//int Saved=0;
         int GPRCount=3;
-        int FPRCount=0;
+        int FPRCount=1;
         int AlignmentBytes=(2*FPRCount+GPRCount+1)/2*16;
-        //int Count=AlignmentBytes/16;
-		int Count=GPRCount;
+        int WordCount=AlignmentBytes/8;
+        int Count=GPRCount;
         int Saved=0;
+        int WordSaved=0;
 		//Create a stack frame with 16-bytes constraint
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::SUBXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0)
 										.setMIFlags(MachineInstr::FrameDestroy);
         
         
         //Save FPR result register
-        // BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q0).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameDestroy);
+        WordSaved+=2;
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRQui)).addReg(AArch64::Q0).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameDestroy);
         
 		//Save argument registers
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameDestroy);
+        WordSaved+=1;
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X0).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameDestroy);
+        WordSaved+=1;
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameDestroy);
         //BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STPQi)).addReg(AArch64::X0).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved).setMIFlags(MachineInstr::FrameDestroy);
      
- 
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(Count-++Saved)
+        WordSaved+=1;
+		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm((WordCount-WordSaved))
 										.setMIFlags(MachineInstr::FrameDestroy);
 
         //Set arguments
@@ -1811,16 +1849,19 @@ void AArch64FrameLowering::emitEpilogue(MachineFunction &MF,
         
         
 		//Restore GPR argument registers
-        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm((WordCount-WordSaved))
 										.setMIFlags(MachineInstr::FrameDestroy);
+        WordSaved-=1;
         
         //BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDPQi)).addDef(AArch64::X0).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameSetup);
-        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameDestroy);
-		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameDestroy);
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameDestroy);
+        WordSaved-=1;
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm((WordCount-WordSaved)).setMIFlags(MachineInstr::FrameDestroy);
+        WordSaved-=1;
         
         //Restore FPR result registers
-        //BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q0).addReg(AArch64::SP).addImm(Count-Saved--).setMIFlags(MachineInstr::FrameDestroy);
-        
+        BuildMI(MBB, LastPopI, DL, TII->get(AArch64::LDRQui)).addDef(AArch64::Q0).addReg(AArch64::SP).addImm((WordCount-WordSaved)/2).setMIFlags(MachineInstr::FrameDestroy);
+        WordSaved-=2;
 		//Remove the stack frame with 16-bytes constraint
 		BuildMI(MBB, LastPopI, DL, TII->get(AArch64::ADDXri)).addDef(AArch64::SP).addReg(AArch64::SP).addImm(std::abs(AlignmentBytes)).addImm(0).setMIFlags(MachineInstr::FrameDestroy);
 	}
