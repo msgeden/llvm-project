@@ -1393,7 +1393,7 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		//Create a stack frame with 16-bytes constraint
 		unsigned SpillBytesSize=AFI->getCalleeSavedStackSize();
 		//Number of registers to be spilled for the call
-        int Count=2;
+        int Count=3;
 		int AlignmentBytes=(Count+1)/2*16;
 		int Saved=0;
 		//Create a stack frame with 16-bytes constraint
@@ -1404,6 +1404,9 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 										.setMIFlags(MachineInstr::FrameSetup);
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X1).addReg(AArch64::SP).addImm(Count-++Saved)
 										.setMIFlags(MachineInstr::FrameSetup);
+		BuildMI(MBB, MBBI, DL, TII->get(AArch64::STRXui)).addReg(AArch64::X2).addReg(AArch64::SP).addImm(Count-++Saved)
+										.setMIFlags(MachineInstr::FrameSetup);
+
 		//Set arguments
 		//MOV  Xd, Xm    is equivalent to ORR Xd, XZR, Xm
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X0).addReg(AArch64::XZR).addReg(AArch64::FP).setMIFlags(MachineInstr::FrameSetup);
@@ -1429,6 +1432,9 @@ void AArch64FrameLowering::emitPrologue(MachineFunction &MF,
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::ORRXrr)).addDef(AArch64::X20).addReg(AArch64::XZR).addReg(AArch64::X0).setMIFlags(MachineInstr::FrameSetup);
 
 		//Restore argument registers
+        BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X2).addReg(AArch64::SP).addImm(Count-Saved--)
+										.setMIFlags(MachineInstr::FrameSetup);
+
         BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X1).addReg(AArch64::SP).addImm(Count-Saved--)
 										.setMIFlags(MachineInstr::FrameSetup);
 		BuildMI(MBB, MBBI, DL, TII->get(AArch64::LDRXui)).addDef(AArch64::X0).addReg(AArch64::SP).addImm(Count-Saved--)
