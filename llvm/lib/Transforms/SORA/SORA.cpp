@@ -32,7 +32,7 @@
 using namespace llvm;
 
 #define DEBUG_TYPE "sora"
-
+#define FREQ_MAX 50
 STATISTIC(TotalVariableCounter, "Counts all local variables");
 
 namespace {
@@ -50,14 +50,18 @@ public:
     static char ID; // Pass identification, replacement for typeid
     std::ofstream file;
     std::ofstream fileAvg;
+    std::ofstream fileFreq;
     SORAVariableCounter() : ModulePass(ID) {}
     bool runOnModule(Module &M) override {
         std::string ModuleStr=M.getName().str();
         std::size_t LastIndex=ModuleStr.rfind("/");
         std::string FilePath=getHomePath()+"/LLVM/Files/count-" + ModuleStr.substr(LastIndex+1) +".tsv";
         std::string AverageFilePath=getHomePath()+"/LLVM/Files/count-Average.tsv";
+        std::string FrequencyFilePath=getHomePath()+"/LLVM/Files/count-Frequency.tsv";
+        
         file.open(FilePath);
         fileAvg.open(AverageFilePath,std::ios_base::app);
+        fileFreq.open(FrequencyFilePath,std::ios_base::app);
         outs() << "Stats for" << M.getName() << "\n";
         file << "Stats for" << M.getName().str() << "\n";
         outs() << "Function" << "\t" << "Variable" << "\t" << "Address" << "\t" << "Argument" << "\n";
@@ -67,6 +71,9 @@ public:
         int TotalLocalVarCount=0;
         int TotalStackAddressCount=0;
         int FunctionCount=0;
+        int VariableFreqCounts[FREQ_MAX];
+        for (unsigned i=0;i<FREQ_MAX:i++)
+            VariableFreqCounts[i]=0;
         for (Function &F:M){
             int ArgCount=0;
             int LocalVarCount=0;
@@ -94,15 +101,27 @@ public:
             TotalStackAddressCount+=StackAddressCount;
             outs() << F.getName() << "\t" << LocalVarCount << "\t" << StackAddressCount << "\t" << ArgCount << "\n";
             file << F.getName().str() << "\t" << LocalVarCount << "\t" << StackAddressCount << "\t" << ArgCount << "\n";
+            if (LocalVarCount<FREQ_MAX)
+                VariableFreqCounts[LocalVarCount]=VariableFreqCounts[LocalVarCount]+1;
         }
+        
         double AvgLocalVarCount=((double)TotalLocalVarCount/(double)FunctionCount);
         double AvgStackAddressCount=((double)TotalStackAddressCount/(double)FunctionCount);
         double AvgArgCount=((double)TotalArgCount/(double)FunctionCount);
         outs() << ModuleStr << "\t" << roundDouble(AvgLocalVarCount) << "\t" << roundDouble(AvgStackAddressCount) << "\t" << roundDouble(AvgArgCount) << "\n";
         file << ModuleStr << "\t" << roundDouble(AvgLocalVarCount) << "\t" << roundDouble(AvgStackAddressCount) << "\t" << roundDouble(AvgArgCount) << "\n";
         fileAvg << ModuleStr << "\t" << roundDouble(AvgLocalVarCount) << "\t" << roundDouble(AvgStackAddressCount) << "\t" << roundDouble(AvgArgCount) << "\n";
+        fileFreq << ModuleStr;
+        outs() << ModuleStr;
+        for (unsigned i=0;i<FREQ_MAX:i++){
+            fileFreq << "\t" << VariableFreqCounts[i];
+            outs() << "\t" << VariableFreqCounts[i];
+        }
+        fileFreq << "\n";
+        outs() << "\n";
         file.close();
         fileAvg.close();
+        fileFreq.close();
         return false;
     }
 };
