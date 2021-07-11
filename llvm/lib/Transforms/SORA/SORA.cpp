@@ -32,7 +32,7 @@
 using namespace llvm;
 
 #define DEBUG_TYPE "sora"
-#define FREQ_MAX 50
+#define FREQ_MAX 100
 STATISTIC(TotalVariableCounter, "Counts all local variables");
 
 namespace {
@@ -51,6 +51,7 @@ public:
     std::ofstream file;
     std::ofstream fileAvg;
     std::ofstream fileFreq;
+    std::ofstream fileTotal;
     SORAVariableCounter() : ModulePass(ID) {}
     bool runOnModule(Module &M) override {
         std::string ModuleStr=M.getName().str();
@@ -58,10 +59,13 @@ public:
         std::string FilePath=getHomePath()+"/LLVM/Files/count-" + ModuleStr.substr(LastIndex+1) +".tsv";
         std::string AverageFilePath=getHomePath()+"/LLVM/Files/count-Average.tsv";
         std::string FrequencyFilePath=getHomePath()+"/LLVM/Files/count-Frequency.tsv";
+        std::string TotalFilePath=getHomePath()+"/LLVM/Files/count-Total.tsv";
         
         file.open(FilePath);
         fileAvg.open(AverageFilePath,std::ios_base::app);
         fileFreq.open(FrequencyFilePath,std::ios_base::app);
+        fileTotal.open(TotalFilePath,std::ios_base::app);
+       
         outs() << "Stats for" << M.getName() << "\n";
         file << "Stats for" << M.getName().str() << "\n";
         outs() << "Function" << "\t" << "Variable" << "\t" << "Address" << "\t" << "Argument" << "\n";
@@ -101,6 +105,7 @@ public:
             TotalStackAddressCount+=StackAddressCount;
             outs() << F.getName() << "\t" << LocalVarCount << "\t" << StackAddressCount << "\t" << ArgCount << "\n";
             file << F.getName().str() << "\t" << LocalVarCount << "\t" << StackAddressCount << "\t" << ArgCount << "\n";
+            fileTotal << F.getName().str() << "\t" << LocalVarCount << "\t" << StackAddressCount << "\t" << ArgCount << "\n";
             if (LocalVarCount<FREQ_MAX)
                 VariableFreqCounts[LocalVarCount]=VariableFreqCounts[LocalVarCount]+1;
         }
@@ -122,6 +127,7 @@ public:
         file.close();
         fileAvg.close();
         fileFreq.close();
+        fileTotal.close();
         return false;
     }
 };
