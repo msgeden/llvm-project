@@ -72,13 +72,13 @@ public:
         int TotalStackAddressCount=0;
         int FunctionCount=0;
         int VariableFreqCounts[FREQ_MAX];
-        for (unsigned i=0;i<FREQ_MAX:i++)
+        for (unsigned i=0;i<FREQ_MAX;i++)
             VariableFreqCounts[i]=0;
         for (Function &F:M){
             int ArgCount=0;
             int LocalVarCount=0;
             int StackAddressCount=0;
-            if (F.empty() || F.getName().startswith("sip24"))
+            if (F.empty() || F.getName().startswith("__"))
                 continue;
             FunctionCount++;
             ArgCount=F.arg_size();
@@ -113,7 +113,7 @@ public:
         fileAvg << ModuleStr << "\t" << roundDouble(AvgLocalVarCount) << "\t" << roundDouble(AvgStackAddressCount) << "\t" << roundDouble(AvgArgCount) << "\n";
         fileFreq << ModuleStr;
         outs() << ModuleStr;
-        for (unsigned i=0;i<FREQ_MAX:i++){
+        for (unsigned i=0;i<FREQ_MAX;i++){
             fileFreq << "\t" << VariableFreqCounts[i];
             outs() << "\t" << VariableFreqCounts[i];
         }
