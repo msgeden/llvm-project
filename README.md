@@ -1,3 +1,14 @@
+# How to run RegGuard on AArch64
+
+(1) Compile this project as a typical LLVM project by following original README instructions given below (for instrumentation).
+
+(2) Compile our C library [(musl libc)](https://github.com/msgeden/musl) that includes necessary MAC functions (for wrapper functions doing MAC generations and checks).
+
+(3) Link your compiled binary to instrumented/non-instrumented libc (for your program to call wrapper functions) with: 
+``-fno-omit-frame-pointer -fno-stack-protector -fno-asynchronous-unwind-tables -reg-alloc=SORA`` flags.
+
+(4) Shell scripts and exact compilation settings used for the benchmark can be found [here](https://github.com/msgeden/tf-sora).
+
 # The LLVM Compiler Infrastructure
 
 This directory and its sub-directories contain source code for LLVM,
