@@ -1,4 +1,4 @@
-# How to run RegGuard on AArch64
+# How to run RegGuard (SORA) on AArch64
 
 (1) Compile this project as a typical LLVM project by following original README instructions given below (for instrumentation).
 
