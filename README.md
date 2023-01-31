@@ -1,13 +1,14 @@
 # How to run RegGuard (SORA) on AArch64
 
-(1) Compile this project as a typical LLVM project by following original README instructions given below (for instrumentation).
+(1) Compile this project as a typical LLVM project by following the original README instructions given below (for instrumentation).
 
-(2) Compile our C library [(musl libc)](https://github.com/msgeden/musl) that includes necessary MAC functions (for wrapper functions doing MAC generations and checks).
+(2) Compile our C library [(musl libc)](https://github.com/msgeden/musl) using a native compiler (non-instrumented libc) or the compiled LLVM project (instrumented libc). This library contains the code responsible for MAC calculations (i.e., wrapper functions). 
 
-(3) Link your compiled binary to instrumented/non-instrumented libc (for your program to call wrapper functions) with: 
-``-fno-omit-frame-pointer -fno-stack-protector -fno-asynchronous-unwind-tables --reg-alloc=SORA`` flags.
+(3) Compile your program using ``-fno-omit-frame-pointer -fno-stack-protector -fno-asynchronous-unwind-tables --reg-alloc=SORA`` flags with the compiled clang/LLVM project.
 
-(4) Shell scripts and exact compilation settings used for the benchmark can be found [here](https://github.com/msgeden/tf-sora).
+(4) Link your program binary to the instrumented or non-instrumented musl library for your program to call wrapper functions at runtime.
+
+(5) Shell scripts and exact compilation settings used for the benchmark suite can be found [here](https://github.com/msgeden/tf-sora).
 
 # The LLVM Compiler Infrastructure
 
